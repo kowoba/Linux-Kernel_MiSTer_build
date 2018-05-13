@@ -6,7 +6,7 @@ Docker for building Linux kernel for the MiSTer
 ### Using Docker
 
 ```
-docker build -t mister_kernel .
+docker build -t mister_kernel https://github.com/kowoba/Linux-Kernel_MiSTer_build.git
 docker run -i mister_kernel | tar xv -
 ```
 
