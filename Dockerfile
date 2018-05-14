@@ -3,33 +3,7 @@ WORKDIR /root/
 SHELL ["/bin/bash", "-c"]
 ENV ARCH arm
 ENV CROSS_COMPILE /root/gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-
-ENV GREEN "\x1b[1;32m"
-ENV NORMAL "\x1b[0m"
-RUN echo -en "\n${GREEN}Preparing build environment ... " ;\
-    apt-get -qq update >/dev/null 2>&1 ;\
-    apt-get -qq -y upgrade >/dev/null 2>&1 ;\
-    apt-get -qq -y install build-essential bc liblz4-tool device-tree-compiler wget >/dev/null 2>&1 ;\
-    echo -e "done!${NORMAL}"
-RUN echo -en "\n${GREEN}Downloading and unpacking cross-compiler ... " ;\
-    wget -q -O - https://releases.linaro.org/components/toolchain/binaries/7.2-2017.11/arm-linux-gnueabihf/gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabihf.tar.xz | tar xJf - ;\
-    echo -e "done!${NORMAL}"
-RUN echo -en "\n${GREEN}Downloading https://github.com/MiSTer-devel/Linux-Kernel_4.5.0_MiSTer/archive/socfpga-4.5.tar.gz ... " ;\
-    wget -q -O - https://github.com/MiSTer-devel/Linux-Kernel_4.5.0_MiSTer/archive/socfpga-4.5.tar.gz | tar xzf - ;\
-    echo -e "done!${NORMAL}"
-RUN echo -e "\n${GREEN}Building default kernel using MiSTer_defconfig, more patience ...${NORMAL}" ;\
-    make -C Linux-Kernel_4.5.0_MiSTer-socfpga-4.5 --quiet clean ;\
-    make -C Linux-Kernel_4.5.0_MiSTer-socfpga-4.5 --quiet mrproper ;\
-    make -C Linux-Kernel_4.5.0_MiSTer-socfpga-4.5 --quiet MiSTer_defconfig ;\
-    make -C Linux-Kernel_4.5.0_MiSTer-socfpga-4.5 --quiet zImage modules dtbs ;\
-    echo -e "done!${NORMAL}"
-COPY MiSTer_config MiSTer_config
-RUN mv -v MiSTer_config Linux-Kernel_4.5.0_MiSTer-socfpga-4.5/.config ;\
-    echo -e "\n${GREEN}Building custom kernel using MiSTer_config, even more patience ...${NORMAL}" ;\
-    make -C Linux-Kernel_4.5.0_MiSTer-socfpga-4.5 --quiet zImage modules dtbs ;\
-    echo -en "\n${GREEN}Assembling zImage_dtb... " ;\
-    cat Linux-Kernel_4.5.0_MiSTer-socfpga-4.5/arch/arm/boot/zImage \
-        Linux-Kernel_4.5.0_MiSTer-socfpga-4.5/arch/arm/boot/dts/socfpga_cyclone5_de10_nano.dtb > zImage_dtb ;\
-    echo -e "done!${NORMAL}"
-#   echo -e "\nTry...\n   docker exec -it <containerIdOrName> bash"
-#   sleep 9999
-CMD tar c zImage_dtb
+RUN (apt-get update; apt-get -y upgrade; apt-get -y install build-essential bc liblz4-tool device-tree-compiler wget libncurses5-dev libncursesw5-dev) >/dev/null 2>&1
+RUN wget -q -O - https://releases.linaro.org/components/toolchain/binaries/7.2-2017.11/arm-linux-gnueabihf/gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabihf.tar.xz | tar xJf -
+RUN wget -q -O - https://github.com/MiSTer-devel/Linux-Kernel_4.5.0_MiSTer/archive/socfpga-4.5.tar.gz | tar xzf -
+RUN make -C Linux-Kernel_4.5.0_MiSTer-socfpga-4.5 --quiet clean mrproper MiSTer_defconfig zImage modules dtbs
